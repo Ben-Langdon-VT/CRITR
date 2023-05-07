@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "PVjWAY2vvksp/FlwpqvyFHmt4Gj7ACy7CMhQlGcE/h+KtbSzr8OIwfqRsTnvqnbUh+7kt9YSt5MQ3BpS9kiLSw==",
+  "dgSpecHash": "IEisTnT5e+GdhKDSL97yXZ0QQoTKIQBNAi4vD4c3Z66nf93g9SCuOh+WLHNF2QiOqEpPDWCO+77pbDVNOdIc6w==",
   "success": true,
   "projectFilePath": "C:\\Users\\Ben\\Desktop\\CRITR\\CRITR.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Ben\\.nuget\\packages\\documentformat.openxml\\2.20.0\\documentformat.openxml.2.20.0.nupkg.sha512",
+    "C:\\Users\\Ben\\.nuget\\packages\\system.io.packaging\\4.7.0\\system.io.packaging.4.7.0.nupkg.sha512"
+  ],
   "logs": []
 }

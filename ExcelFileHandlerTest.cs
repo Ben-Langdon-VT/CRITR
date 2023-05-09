@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace CRITR{
-    class Program
+    class ExcelFileHanderTest
     {
         
         static void Main(string[] args)

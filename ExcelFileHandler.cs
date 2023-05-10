@@ -44,7 +44,8 @@ namespace CRITR
 
             StringValue? id = sheet.Id;
 
-            if (id == null){
+            if (id == null)
+            {
                 throw new AggregateException("something wrong with file format, could not find sheet id in " + fileName);
             }
 
@@ -129,7 +130,7 @@ namespace CRITR
         //These are all nullable, couldnt think of a better way of handling it
         //i really want to return an empty cell/row here with the right name/ datatype /value but cant declare my own cells
 
-        public Cell? lookupCellType(int row, int column)
+        public Cell? lookupCellNumber(int row, int column)
         {
             //Again assumes it is using worksheet1            
             string cellName = CellName(row, column);
@@ -140,7 +141,7 @@ namespace CRITR
 
 
         //searches for cell in given row, slightly faster for big docs than searching for cell in whole thing
-        public Cell? lookupCellTypeRow(int rowNum, int columnNum, Row row)
+        public Cell? lookupCellNumberRow(int rowNum, int columnNum, Row row)
         {
 
             string cellName = CellName(rowNum, columnNum);
@@ -153,6 +154,78 @@ namespace CRITR
         {
             Row? row = worksheetPart.Worksheet.Descendants<Row>().Where(r => r.InnerText == rowNum.ToString()).FirstOrDefault();
             return row;
+        }
+
+        public String GetCellValueAsString(Cell cell)
+        {
+            String outstring = "";
+            if (cell.DataType == null)
+            {
+                outstring = cell.InnerText;
+
+            }
+            else if (cell.DataType != CellValues.SharedString)
+            {
+                outstring = cell.InnerText;
+            }
+            else if (cell.DataType == CellValues.SharedString)
+            {
+                int ssid = int.Parse(cell.CellValue.Text);
+                outstring = ssTable.ChildElements[ssid].InnerText;
+            }
+
+            return outstring;
+        }
+        //Get Headings row
+        public List<String> GetHeaders(int headings)
+        {
+            List<String> headers = new List<String>();
+            Row? headerRow = lookupRow(1);
+            if (headerRow == null)
+            {
+                throw new ArgumentNullException("Row 1 (header row) is empty (null)");
+            }
+            int rowCount = headerRow.Descendants<Cell>().Count<Cell>();
+            if (rowCount != headings) throw new FormatException(String.Format("Supposed to be {0} cells in this row but {1} detected", headings, rowCount));
+
+            for (int i = 1; i <= headings; i++)
+            {
+                Cell? c = lookupCellNumberRow(headings, i, headerRow);
+                if (c == null) throw new ArgumentNullException(String.Format("Empty cell detected at {0}", CellName(headings, i)));
+                headers.Add(GetCellValueAsString(c));
+            }
+
+            return headers;
+        }
+        //Get count of rows so we can make a loop in 
+        public int CountDataRows()
+        {
+            return sheetData.Descendants<Row>().Where(r => r.InnerText != "1").Count<Row>();
+        }
+
+        //Read in a data Row
+        public List<String> GetDataRow(int headings, int rowNum)
+        {
+            if (rowNum < 0) throw new ArgumentException("data row number must be greater than 0");
+            rowNum += 2;
+            List<String> data = new List<String>();
+            Row? dataRow = lookupRow(rowNum);
+            if (dataRow == null)
+            {
+                throw new ArgumentNullException(String.Format("Row {0} is empty (null)"), rowNum.ToString());
+            }
+            int rowCount = dataRow.Descendants<Cell>().Count<Cell>();
+            if (rowCount != headings) throw new FormatException(String.Format("Supposed to be {0} cells in this row but {1} detected", headings, rowCount));
+
+            for (int i = 1; i <= headings; i++)
+            {
+                Cell? c = lookupCellNumberRow(headings, i, dataRow);
+                if (c == null) throw new ArgumentNullException(String.Format("Empty cell detected at {0}", CellName(headings, i)));
+                data.Add(GetCellValueAsString(c));
+            }
+
+            return data;
+
         }
     }
 }

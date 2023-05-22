@@ -1,35 +1,62 @@
 namespace CRITR
 {
 
-    
+
     class Program
     {
         //internal variables
+        String masterFolder;
+        String imageFolder;
+        String inputTable;
+        String templatePath;
+        String outputFile;
 
-        
+        List<ImageInfoContainer> data;
+
 
         public void printHelp()
         {
-            
+
         }
-        
+
 
         //main processes args, calls mainloop
-        static void Main(string[] args)
+        public Program(string[] args)
         {
             //Grouped all of this into main loop because static method wont run non static methods/variables of same class because its non deterministic (i think)
-            String masterFolder = "default";
-            String imageFolder = "images";
-            String inputTable = "image_data.xlsx";
-            String outputFile = "defaultOutput";
-            
+            masterFolder = @"C:\Users\Ben\Desktop\test";
+            imageFolder = "images";
+            inputTable = "image_data.xlsx";
+            templatePath = "testTemplate.docx";
+            outputFile = "defaultOutput";
+
+            data = new List<ImageInfoContainer>();
+
             bool useMaster = true;
             int length = args.Length;
             if (length <= 1) return;
             for (int i = 0; i < length; i++)
             {
                 string arg = args[i];
-                if (arg == "Program.cs") continue;
+                if (arg == "CRITR") continue;
+                if (arg == "--excelTest")
+                {
+
+                    ExcelFileHandlerTest test = new ExcelFileHandlerTest();
+                    test.Main();
+                    return;
+                }
+                else if (arg == "--docxTest")
+                {
+                    DocxFileHandlerTest test = new DocxFileHandlerTest();
+                    test.Main();
+                    return;
+                }
+                else if (arg == "--DocxWriteDataTest")
+                {
+                    DocxWriteDataTest test = new DocxWriteDataTest();
+                    test.Test1();
+                }
                 else if (arg == "--help")
                 {
                     Console.WriteLine("Usable Command Line Arguments:");
@@ -89,6 +116,37 @@ namespace CRITR
 
             //Start of actual mainloop
 
+        }
+
+        public void LoadData()
+        {
+            ExcelLoadData loader = new ExcelLoadData(inputTable);
+
+
+        }
+        public void sortData()
+        {
+            if (data == new List<ImageInfoContainer>())
+            {
+                throw new FormatException(String.Format("Cannot sort data before loading it"));
+            }
+            else
+            {
+
+            }
+
+        }
+        public void GenerateDoc()
+        {
+            if (data == new List<ImageInfoContainer>())
+            {
+                throw new FormatException(String.Format("Cannot write data before loading it"));
+            }
+            else
+            {
+                DocxWriteData writer = new DocxWriteData(templatePath, outputFile, imageFolder, data);
+                writer.WriteLoop();
+            }
         }
 
     }

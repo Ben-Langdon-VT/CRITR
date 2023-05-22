@@ -42,12 +42,9 @@ namespace CRITR
             sstPart = workbookPart.GetPartsOfType<SharedStringTablePart>().First();
             ssTable = sstPart.SharedStringTable;
 
-            StringValue? id = sheet.Id;
+            String? id = sheet.Id;
 
-            if (id == null)
-            {
-                throw new AggregateException("something wrong with file format, could not find sheet id in " + fileName);
-            }
+            if (id == null) throw new FileLoadException("something wrong with file format, could not find sheet id in " + fileName);
 
             worksheetPart = (WorksheetPart)workbookPart.GetPartById(id);
             sheetData = worksheetPart.Worksheet.Elements<SheetData>().First();
@@ -65,7 +62,7 @@ namespace CRITR
 
                 foreach (Cell cell in row.Elements<Cell>())
                 {
-                    string cellname = cell.CellReference;
+                    string? cellname = cell.CellReference;
                     Console.WriteLine("innerText: {0}, DataType: {1}", cell.InnerText, cell.DataType);
                     if (cell.DataType == null)
                     {
@@ -78,7 +75,9 @@ namespace CRITR
                     }
                     else if (cell.DataType == CellValues.SharedString)
                     {
-                        int ssid = int.Parse(cell.CellValue.Text);
+                        CellValue? cellVal = cell.CellValue;
+                        if (cellVal == null) throw new FileLoadException("Empty Cell value detected, cell value should never be null");
+                        int ssid = int.Parse(cellVal.Text);
                         string str = ssTable.ChildElements[ssid].InnerText;
                         output += cellname + ": " + str + ", ";
                     }
@@ -170,28 +169,29 @@ namespace CRITR
             }
             else if (cell.DataType == CellValues.SharedString)
             {
-                int ssid = int.Parse(cell.CellValue.Text);
-                outstring = ssTable.ChildElements[ssid].InnerText;
-            }
+                CellValue? val = cell.CellValue;
 
+                if(val != null){
+                    int ssid = int.Parse(val.Text);
+                    outstring = ssTable.ChildElements[ssid].InnerText;
+                }
+            }
             return outstring;
         }
-        //Get Headings row
-        public List<String> GetHeaders(int headings)
+        //Get data from row, will throw error if row is not filled properly(empty cells)
+        public List<String> GetFilledRow(int rowNum)
         {
             List<String> headers = new List<String>();
-            Row? headerRow = lookupRow(1);
+            Row? headerRow = lookupRow(rowNum);
             if (headerRow == null)
             {
-                throw new ArgumentNullException("Row 1 (header row) is empty (null)");
+                throw new ArgumentNullException(String.Format("Row {0} is empty (null)",rowNum));
             }
             int rowCount = headerRow.Descendants<Cell>().Count<Cell>();
-            if (rowCount != headings) throw new FormatException(String.Format("Supposed to be {0} cells in this row but {1} detected", headings, rowCount));
-
-            for (int i = 1; i <= headings; i++)
+            for (int i = 1; i <= rowCount; i++)
             {
-                Cell? c = lookupCellNumberRow(headings, i, headerRow);
-                if (c == null) throw new ArgumentNullException(String.Format("Empty cell detected at {0}", CellName(headings, i)));
+                Cell? c = lookupCellNumberRow(1, i, headerRow);
+                if (c == null) throw new ArgumentNullException(String.Format("Empty cell detected at {0}", CellName(rowNum, i)));
                 headers.Add(GetCellValueAsString(c));
             }
 
@@ -223,9 +223,7 @@ namespace CRITR
                 if (c == null) throw new ArgumentNullException(String.Format("Empty cell detected at {0}", CellName(headings, i)));
                 data.Add(GetCellValueAsString(c));
             }
-
             return data;
-
         }
     }
 }

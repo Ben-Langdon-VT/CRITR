@@ -7,12 +7,28 @@ namespace CRITR
         List<DataValueType> types;
         int headings;
         //data value type substitute for excel config for now
-        public ExcelLoadData(String fileName, List<DataValueType> _types)
+        public ExcelLoadData(String fileName)
         {
             fileHandler = new ExcelFileHandler(fileName);
-            types = _types;
-            headings = types.Count;
-            headers = fileHandler.GetHeaders(headings);
+            //Excel row numbers start at 1 and not 0
+            headers = fileHandler.GetFilledRow(1);
+            List<String> rawTypes = fileHandler.GetFilledRow(1);
+            List<DataValueType> types = new List<DataValueType>();
+            foreach(String typeName in rawTypes)
+            {
+                DataValueType newType;
+                if(Enum.TryParse(typeName, out newType))
+                {
+                    types.Add(newType);
+                }
+                else{
+                    throw new FileLoadException(String.Format("Error Parsing DataValueType {0}, setting to string",typeName));
+                    types.Add(DataValueType.String);
+                }
+            }
+            if(headers.Count != types.Count){
+                throw new FileLoadException(String.Format("error Loading file: number of headers do not match number of dataTypes in file {0}",fileName));
+            }
         }
 
         public List<ImageInfoContainer> LoadData()

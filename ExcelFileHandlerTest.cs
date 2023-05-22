@@ -1,10 +1,13 @@
 ﻿using System;
 
 namespace CRITR{
-    class ExcelFileHanderTest
+    class ExcelFileHandlerTest
     {
-        
-        static void Main(string[] args)
+        public ExcelFileHandlerTest()
+        {
+            
+        }
+        public void Main()
         {
             string filePath = @"C:\Users\Ben\Desktop\test\testdoc.xlsx";
             ExcelFileHandler excelHandler = new ExcelFileHandler(filePath);

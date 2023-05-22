@@ -37,7 +37,7 @@ namespace CRITR
         virtual public String PrintData()
         {
             return "";
-            }
+        }
         public static DataValue InitFromString(DataValueType type, String value)
         {
             if(type == DataValueType.Date)return new DataDate(value);

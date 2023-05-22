@@ -13,7 +13,7 @@ namespace CRITR
             //Excel row numbers start at 1 and not 0
             headers = fileHandler.GetFilledRow(1);
             List<String> rawTypes = fileHandler.GetFilledRow(1);
-            List<DataValueType> types = new List<DataValueType>();
+            types = new List<DataValueType>();
             foreach(String typeName in rawTypes)
             {
                 DataValueType newType;

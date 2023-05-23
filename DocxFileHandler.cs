@@ -144,8 +144,6 @@ namespace CRITR
 
                 var element = mainPart.Document.Descendants<DocumentFormat.OpenXml.Drawing.Blip>().Last();
                 element.Embed = mainPart.GetIdOfPart(newImagePart);
-
-                mainPart.Document.Save();
             }
         }
         //Loops through each text element in a document body and replaces keywords

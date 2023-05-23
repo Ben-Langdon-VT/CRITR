@@ -23,7 +23,6 @@ namespace CRITR
                 }
                 else{
                     throw new FileLoadException(String.Format("Error Parsing DataValueType {0}, setting to string",typeName));
-                    types.Add(DataValueType.String);
                 }
             }
             if(headers.Count != types.Count){
@@ -43,8 +42,6 @@ namespace CRITR
                 ImageInfoContainer image = new ImageInfoContainer(headers, types, rowData);
                 images.Add(image);
             }
-
-
             return images;
         }
     }

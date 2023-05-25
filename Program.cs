@@ -15,9 +15,15 @@ namespace CRITR
         Dictionary<String, List<ImageInfoContainer>> sortedData;
 
 
-        public void printHelp()
+        private void printHelp()
         {
-
+            Console.WriteLine("Usable Command Line Arguments:");
+            Console.WriteLine("--help: list command line arguments");
+            Console.WriteLine("--targetFolder \"folderName\": set target folder for script");
+            Console.WriteLine("--exactNames: can set input table, image folder, and output file to items outside of the target folder");
+            Console.WriteLine("--imageFolder: set name of images");
+            Console.WriteLine("--inputTable: set name of excel file to read inputs from");
+            Console.WriteLine("--outputFile: set name of .docx file to save output");
         }
 
 
@@ -58,16 +64,11 @@ namespace CRITR
                 {
                     DocxWriteDataTest test = new DocxWriteDataTest();
                     test.Test1();
+                    return;
                 }
                 else if (arg == "--help")
                 {
-                    Console.WriteLine("Usable Command Line Arguments:");
-                    Console.WriteLine("--help: list command line arguments");
-                    Console.WriteLine("--targetFolder \"folderName\": set target folder for script");
-                    Console.WriteLine("--exactNames: can set input table, image folder, and output file to items outside of the target folder");
-                    Console.WriteLine("--imageFolder: set name of images");
-                    Console.WriteLine("--inputTable: set name of excel file to read inputs from");
-                    Console.WriteLine("--outputFile: set name of .docx file to save output");
+                    printHelp();
                     return;
                 }
                 else if (arg == "--targetFolder")
@@ -104,8 +105,6 @@ namespace CRITR
                 {
                     throw new ArgumentException(String.Format("Argument {0} not recognized, plase use --help for list of valid arguments", arg));
                 }
-
-
             }
 
             if (useMaster)
@@ -120,11 +119,18 @@ namespace CRITR
 
         }
 
-        public void LoadData()
+        public bool LoadData()
         {
-            ExcelLoadData loader = new ExcelLoadData(inputTable);
-
-
+            try
+            {
+                ExcelLoadData loader = new ExcelLoadData(inputTable);
+                data = loader.LoadData();
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
         }
         public void SetData(List<ImageInfoContainer> _data)
         {
@@ -142,50 +148,66 @@ namespace CRITR
         {
             return sortedData;
         }
-        public void sortData()
+        public bool sortData()
         {
             //Exceptions: if data is empty, throw and error that we cannot sort it
             //If first container does not have the property "class", sort whole list and add it under class ""
-            if (data == new List<ImageInfoContainer>())
+            try
             {
-                throw new FormatException(String.Format("Cannot sort data before loading it"));
-            }
-            if (data[0].GetPropertyString("class") == "")
-            {
-                data.Sort((x, y) => x.GetPropertyString("bdr_photolocation").CompareTo(y.GetPropertyString("bdr_photolocation")));
-                sortedData.Add("", data);
-                return;
-            }
-            foreach (ImageInfoContainer container in data)
-            {
-                String className = container.GetPropertyString("class");
-                if (sortedData.ContainsKey(className))
+                if (data == new List<ImageInfoContainer>())
                 {
-                    sortedData[className].Append(container);
+                    throw new FormatException(String.Format("Cannot sort data before loading it"));
+                }
+                if (data[0].GetPropertyString("class") == "")
+                {
+                    data.Sort((x, y) => x.GetPropertyString("bdr_photolocation").CompareTo(y.GetPropertyString("bdr_photolocation")));
+                    sortedData.Add("", data);
+                    return true;
+                }
+                foreach (ImageInfoContainer container in data)
+                {
+                    String className = container.GetPropertyString("class");
+                    if (sortedData.ContainsKey(className))
+                    {
+                        sortedData[className].Append(container);
+                    }
+                    else
+                    {
+                        List<ImageInfoContainer> containerList = new List<ImageInfoContainer>();
+                        containerList.Add(container);
+                        sortedData.Add(className, containerList);
+                    }
+                }
+                foreach (String key in sortedData.Keys)
+                {
+                    sortedData[key].Sort((x, y) => x.GetPropertyString("bdr_photolocation").CompareTo(y.GetPropertyString("bdr_photolocation")));
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
+        public bool GenerateDoc()
+        {
+            try
+            {
+                if (data == new List<ImageInfoContainer>())
+                {
+                    throw new FormatException(String.Format("Cannot write data before loading it"));
                 }
                 else
                 {
-                    List<ImageInfoContainer> containerList = new List<ImageInfoContainer>();
-                    containerList.Add(container);
-                    sortedData.Add(className, containerList);
+                    DocxWriteData writer = new DocxWriteData(templatePath, outputFile, imageFolder, sortedData);
+                    writer.WriteLoop();
                 }
             }
-            foreach (String key in sortedData.Keys)
+            catch
             {
-                sortedData[key].Sort((x, y) => x.GetPropertyString("bdr_photolocation").CompareTo(y.GetPropertyString("bdr_photolocation")));
+                return false;
             }
-        }
-        public void GenerateDoc()
-        {
-            if (data == new List<ImageInfoContainer>())
-            {
-                throw new FormatException(String.Format("Cannot write data before loading it"));
-            }
-            else
-            {
-                DocxWriteData writer = new DocxWriteData(templatePath, outputFile, imageFolder, sortedData);
-                writer.WriteLoop();
-            }
+            return true;
         }
 
     }

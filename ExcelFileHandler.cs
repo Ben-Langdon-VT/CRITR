@@ -163,7 +163,9 @@ namespace CRITR
         //Get count of rows so we can make a loop in 
         public int CountDataRows()
         {
-            return sheetData.Descendants<Row>().Where(r => r.InnerText != "1").Count<Row>();
+            int? count = sheetData?.Descendants<Row>().Where(r => r.InnerText != "1").Count<Row>();
+            if (count == null) return 0;
+            return (int)count;
         }
 
         //Read in a data Row

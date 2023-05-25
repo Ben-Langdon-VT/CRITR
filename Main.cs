@@ -4,9 +4,21 @@ namespace CRITR
         static void Run(string[] args)
         {
             Program ExcelToDocx = new Program(args);
-            ExcelToDocx.LoadData();
-            ExcelToDocx.sortData();
+            bool worked = ExcelToDocx.LoadData();
+            if (!worked)
+            {
+                return;
+            }
+            worked = ExcelToDocx.sortData();
+            if (!worked)
+            {
+                return;
+            }
             ExcelToDocx.GenerateDoc();
+            if (!worked)
+            {
+                return;
+            }
         }
     }
 }

@@ -102,7 +102,7 @@ namespace CRITR
     class DataImageName : DataValue
     {
         String name;
-        public DataImageName(String n) : base(DataValueType.GpsFloat)
+        public DataImageName(String n) : base(DataValueType.String)
         {
             if (n.Substring(n.Length - 4) != ".jpg")
             {

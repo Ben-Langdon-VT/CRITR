@@ -8,10 +8,10 @@ namespace CRITR
         String templatePath;
 
         String imageFolderPath;
-        List<ImageInfoContainer> imageContainers;
+        Dictionary<String, List<ImageInfoContainer>> imageContainers;
 
         DocxFileHandler fileHandler;
-        public DocxWriteData(String _templatePath, String _outputPath, String _imageFolderPath, List<ImageInfoContainer> _imageContainers)
+        public DocxWriteData(String _templatePath, String _outputPath, String _imageFolderPath, Dictionary<String, List<ImageInfoContainer>> _imageContainers)
         {
             fileHandler = new DocxFileHandler();
 
@@ -44,9 +44,19 @@ namespace CRITR
         }
         public void WriteLoop()
         {
-            foreach (ImageInfoContainer entry in imageContainers)
+            foreach (String key in imageContainers.Keys)
             {
-                WriteEntry(entry);
+                if(key == "")
+                {
+                    fileHandler.AddSimpleParagraph(outputPath, key);
+                }
+                
+                List<ImageInfoContainer> containerList = imageContainers[key];
+                
+                foreach (ImageInfoContainer entry in containerList)
+                {
+                    WriteEntry(entry);
+                }
             }
         }
     }

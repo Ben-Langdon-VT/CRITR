@@ -11,32 +11,30 @@ namespace CRITR
 {
 
     //Assumptions: simple workbook, no advanced parts, has only 1 worksheet
-    class ExcelFileHandler
+    class ExcelFileHandler : IDisposable
     {
         //internal stuff so i only need to lookup file once
-        public string fileName = "default.xlsx";
-        SpreadsheetDocument excelDoc;
-        SharedStringTablePart sstPart;
-        SharedStringTable ssTable;
-        WorksheetPart worksheetPart;
-        SheetData sheetData;
+        private SpreadsheetDocument? excelDoc;
+        private SharedStringTablePart? sstPart;
+        private SharedStringTable? ssTable;
+        private WorksheetPart? worksheetPart;
+        private SheetData? sheetData;
 
-        public ExcelFileHandler(string _fileName)
+        public void Open(String filePath)
         {
-            fileName = _fileName;
-            excelDoc = SpreadsheetDocument.Open(fileName, false);
+            excelDoc = SpreadsheetDocument.Open(filePath, false);
             WorkbookPart? workbookPart = excelDoc.WorkbookPart;
             //several nullable types, throw an error if one of them is null. will probably only happen if pointed at a weird/damaged/not xlsx file or Oxml standard changes
             if (workbookPart == null)
             {
-                throw new ArgumentException("no workbookPart found in file " + fileName);
+                throw new ArgumentException("no workbookPart found in file " + filePath);
             }
             //We assume that we are only using worsheet 1
             Sheet? sheet = workbookPart.Workbook.Descendants<Sheet>().FirstOrDefault();
 
             if (sheet == null)
             {
-                throw new ArgumentException("no sheets found in file " + fileName);
+                throw new ArgumentException("no sheets found in file " + filePath);
             }
 
             sstPart = workbookPart.GetPartsOfType<SharedStringTablePart>().First();
@@ -44,60 +42,21 @@ namespace CRITR
 
             String? id = sheet.Id;
 
-            if (id == null) throw new FileLoadException("something wrong with file format, could not find sheet id in " + fileName);
+            if (id == null) throw new FileLoadException("something wrong with file format, could not find sheet id in " + filePath);
 
             worksheetPart = (WorksheetPart)workbookPart.GetPartById(id);
             sheetData = worksheetPart.Worksheet.Elements<SheetData>().First();
-
         }
-        //other print option, somewhat lame, riddled with possible nullable types so probs dont use much/rework if i need more excel debugging.
-        public string PrintExcelFile()
+        public ExcelFileHandler(){}
+        public void Dispose()
         {
-            string output = "";
-
-
-            foreach (Row row in sheetData.Elements<Row>())
-            {
-                output += row.RowIndex + ": ";
-
-                foreach (Cell cell in row.Elements<Cell>())
-                {
-                    string? cellname = cell.CellReference;
-                    Console.WriteLine("innerText: {0}, DataType: {1}", cell.InnerText, cell.DataType);
-                    if (cell.DataType == null)
-                    {
-                        output += cellname + ": " + cell.InnerText + ", ";
-
-                    }
-                    else if (cell.DataType != CellValues.SharedString)
-                    {
-                        output += cell.InnerText + ", ";
-                    }
-                    else if (cell.DataType == CellValues.SharedString)
-                    {
-                        CellValue? cellVal = cell.CellValue;
-                        if (cellVal == null) throw new FileLoadException("Empty Cell value detected, cell value should never be null");
-                        int ssid = int.Parse(cellVal.Text);
-                        string str = ssTable.ChildElements[ssid].InnerText;
-                        output += cellname + ": " + str + ", ";
-                    }
-                }
-                output += "\n";
-            }
-            return output;
+            excelDoc?.Dispose();
+            excelDoc = null;
+            sstPart = null;
+            ssTable = null;
+            worksheetPart = null;
+            sheetData = null;
         }
-        //simple print rows functions
-        public string PrintRows()
-        {
-            string outstring = "";
-            var rows = sheetData.Descendants<Row>();
-            foreach (Row row in rows)
-            {
-                outstring += row.RowIndex + ", ";
-            }
-            return outstring;
-        }
-
         //stolen from stack overflow, i wrote a version that was recursive and indexes a string of values which is bad for memory/reliability,
         //this one uses a loop(no accidental stack overflow) and directly generates char value so its a bit better stability/memory wise.
         private string columnNumToAlpha(int columnNumber)
@@ -131,33 +90,33 @@ namespace CRITR
 
         public Cell? lookupCellNumber(int row, int column)
         {
+            if(excelDoc == null)
+            {
+                return null;
+            }
             //Again assumes it is using worksheet1            
             string cellName = CellName(row, column);
-            Cell? theCell = worksheetPart.Worksheet.Descendants<Cell>().Where(c => c.CellReference == cellName).FirstOrDefault();
+            Cell? theCell = worksheetPart?.Worksheet.Descendants<Cell>().Where(c => c.CellReference == cellName).FirstOrDefault();
 
             return theCell;
         }
-
-
         //searches for cell in given row, slightly faster for big docs than searching for cell in whole thing
         public Cell? lookupCellNumberRow(int rowNum, int columnNum, Row row)
         {
-
             string cellName = CellName(rowNum, columnNum);
             Cell? theCell = row.Descendants<Cell>().Where(c => c.CellReference == cellName).FirstOrDefault();
             return theCell;
         }
-
         //search for row in worksheet1
         public Row? lookupRow(int rowNum)
         {
-            Row? row = worksheetPart.Worksheet.Descendants<Row>().Where(r => r.InnerText == rowNum.ToString()).FirstOrDefault();
+            Row? row = worksheetPart?.Worksheet.Descendants<Row>().Where(r => r.InnerText == rowNum.ToString()).FirstOrDefault();
             return row;
         }
 
         public String GetCellValueAsString(Cell cell)
         {
-            String outstring = "";
+            String? outstring = "";
             if (cell.DataType == null)
             {
                 outstring = cell.InnerText;
@@ -173,8 +132,12 @@ namespace CRITR
 
                 if(val != null){
                     int ssid = int.Parse(val.Text);
-                    outstring = ssTable.ChildElements[ssid].InnerText;
+                    outstring = ssTable?.ChildElements[ssid].InnerText;
                 }
+            }
+            if(outstring == null)
+            {
+                return "";
             }
             return outstring;
         }
@@ -204,9 +167,9 @@ namespace CRITR
         }
 
         //Read in a data Row
-        public List<String> GetDataRow(int headings, int rowNum)
+        public List<String> GetDataRow(int rowNum, int headings)
         {
-            if (rowNum < 0) throw new ArgumentException("data row number must be greater than 0");
+            if (rowNum <= 0) throw new ArgumentException("data row number must be greater than 0");
             rowNum += 2;
             List<String> data = new List<String>();
             Row? dataRow = lookupRow(rowNum);
@@ -215,12 +178,14 @@ namespace CRITR
                 throw new ArgumentNullException(String.Format("Row {0} is empty (null)"), rowNum.ToString());
             }
             int rowCount = dataRow.Descendants<Cell>().Count<Cell>();
-            if (rowCount != headings) throw new FormatException(String.Format("Supposed to be {0} cells in this row but {1} detected", headings, rowCount));
-
-            for (int i = 1; i <= headings; i++)
+            if(rowCount != headings)
             {
-                Cell? c = lookupCellNumberRow(headings, i, dataRow);
-                if (c == null) throw new ArgumentNullException(String.Format("Empty cell detected at {0}", CellName(headings, i)));
+                throw new FileFormatException(String.Format("Row {0} has {1} filled cells while there are supposed to be {2} cells, possible file format error"));
+            }
+            for (int i = 1; i <= rowCount; i++)
+            {
+                Cell? c = lookupCellNumberRow(rowCount, i, dataRow);
+                if (c == null) throw new ArgumentNullException(String.Format("Empty cell detected at {0}", CellName(rowCount, i)));
                 data.Add(GetCellValueAsString(c));
             }
             return data;

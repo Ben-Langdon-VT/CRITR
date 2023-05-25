@@ -10,10 +10,9 @@ namespace CRITR{
         public void Main()
         {
             string filePath = @"C:\Users\Ben\Desktop\test\testdoc.xlsx";
-            ExcelFileHandler excelHandler = new ExcelFileHandler(filePath);
-            Console.Write(excelHandler.PrintExcelFile());
-            Console.WriteLine();
-            Console.Write(excelHandler.PrintRows());
+            ExcelFileHandler excelHandler = new ExcelFileHandler();
+            excelHandler.Open(filePath);
+            excelHandler.Dispose();
         }
     }
 }

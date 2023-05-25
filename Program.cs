@@ -12,6 +12,7 @@ namespace CRITR
         String outputFile;
 
         List<ImageInfoContainer> data;
+        Dictionary<String, List<ImageInfoContainer>> sortedData;
 
 
         public void printHelp()
@@ -31,6 +32,7 @@ namespace CRITR
             outputFile = "defaultOutput";
 
             data = new List<ImageInfoContainer>();
+            sortedData = new Dictionary<String, List<ImageInfoContainer>>();
 
             bool useMaster = true;
             int length = args.Length;
@@ -124,17 +126,54 @@ namespace CRITR
 
 
         }
+        public void SetData(List<ImageInfoContainer> _data)
+        {
+            data = _data;
+        }
+        public List<ImageInfoContainer> GetData()
+        {
+            return data;
+        }
+        public void SetSortedData(Dictionary<String, List<ImageInfoContainer>> _sData)
+        {
+            sortedData = _sData;
+        }
+        public Dictionary<String, List<ImageInfoContainer>> GetSortedData()
+        {
+            return sortedData;
+        }
         public void sortData()
         {
+            //Exceptions: if data is empty, throw and error that we cannot sort it
+            //If first container does not have the property "class", sort whole list and add it under class ""
             if (data == new List<ImageInfoContainer>())
             {
                 throw new FormatException(String.Format("Cannot sort data before loading it"));
             }
-            else
+            if (data[0].GetPropertyString("class") == "")
             {
-
+                data.Sort((x, y) => x.GetPropertyString("bdr_photolocation").CompareTo(y.GetPropertyString("bdr_photolocation")));
+                sortedData.Add("", data);
+                return;
             }
-
+            foreach (ImageInfoContainer container in data)
+            {
+                String className = container.GetPropertyString("class");
+                if (sortedData.ContainsKey(className))
+                {
+                    sortedData[className].Append(container);
+                }
+                else
+                {
+                    List<ImageInfoContainer> containerList = new List<ImageInfoContainer>();
+                    containerList.Add(container);
+                    sortedData.Add(className, containerList);
+                }
+            }
+            foreach (String key in sortedData.Keys)
+            {
+                sortedData[key].Sort((x, y) => x.GetPropertyString("bdr_photolocation").CompareTo(y.GetPropertyString("bdr_photolocation")));
+            }
         }
         public void GenerateDoc()
         {
@@ -144,7 +183,7 @@ namespace CRITR
             }
             else
             {
-                DocxWriteData writer = new DocxWriteData(templatePath, outputFile, imageFolder, data);
+                DocxWriteData writer = new DocxWriteData(templatePath, outputFile, imageFolder, sortedData);
                 writer.WriteLoop();
             }
         }

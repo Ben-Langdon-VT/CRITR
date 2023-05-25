@@ -2,7 +2,7 @@ namespace CRITR{
     class DocxWriteDataTest
     {
         
-        public void Main(String templatePath, String outputPath, String imageFolderPath, List<ImageInfoContainer> imageData)
+        public void Main(String templatePath, String outputPath, String imageFolderPath, Dictionary<String, List<ImageInfoContainer>>imageData)
         {
             DocxWriteData newDoc = new DocxWriteData(templatePath, outputPath, imageFolderPath, imageData);
             newDoc.WriteLoop();
@@ -19,7 +19,7 @@ namespace CRITR{
             List<String> values = new List<String>{"1234.jpg","5.000002"};
             ImageInfoContainer image = new ImageInfoContainer(headers, types, values);
 
-            List<ImageInfoContainer> imageData = new List<ImageInfoContainer>{image};
+            Dictionary<String, List<ImageInfoContainer>> imageData = new Dictionary<String, List<ImageInfoContainer>>{{"", new List<ImageInfoContainer>{image}}};
             Main(templatePath, outputPath, imageFolderPath, imageData);
         }
     }

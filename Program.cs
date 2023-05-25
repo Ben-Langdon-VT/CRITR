@@ -1,7 +1,5 @@
 namespace CRITR
 {
-
-
     class Program
     {
         //internal variables
@@ -13,8 +11,6 @@ namespace CRITR
 
         List<ImageInfoContainer> data;
         Dictionary<String, List<ImageInfoContainer>> sortedData;
-
-
         private void printHelp()
         {
             Console.WriteLine("Usable Command Line Arguments:");
@@ -25,8 +21,6 @@ namespace CRITR
             Console.WriteLine("--inputTable: set name of excel file to read inputs from");
             Console.WriteLine("--outputFile: set name of .docx file to save output");
         }
-
-
         //main processes args, calls mainloop
         public Program(string[] args)
         {
@@ -109,16 +103,11 @@ namespace CRITR
 
             if (useMaster)
             {
-
                 imageFolder = Path.Combine(masterFolder, imageFolder);
                 inputTable = Path.Combine(masterFolder, inputTable);
                 outputFile = Path.Combine(masterFolder, outputFile);
             }
-
-            //Start of actual mainloop
-
         }
-
         public bool LoadData()
         {
             try
@@ -209,6 +198,5 @@ namespace CRITR
             }
             return true;
         }
-
     }
 }

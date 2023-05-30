@@ -1,9 +1,10 @@
+using Serilog;
+
 namespace CRITR
 {
 
     class DocxWriteData
     {
-
         String outputPath;
         String templatePath;
 
@@ -13,6 +14,7 @@ namespace CRITR
         DocxFileHandler fileHandler;
         public DocxWriteData(String _templatePath, String _outputPath, String _imageFolderPath, Dictionary<String, List<ImageInfoContainer>> _imageContainers)
         {
+            Log.Logger.Information("Initializing DocxWriteData Object outputing to {0}", _outputPath);
             fileHandler = new DocxFileHandler();
 
             templatePath = _templatePath;
@@ -39,6 +41,7 @@ namespace CRITR
             {
                 throw new FileLoadException(String.Format("Could not find image named {0} in folder {1}", fullImagePath, imageFolderPath));
             }
+            Log.Logger.Information("Adding Entry for image {0} to word Document", fullImagePath);
 
             fileHandler.ReplaceAppendTemplate(templatePath, outputPath, imageContainer.GetStringProperties(), fullImagePath);
         }
@@ -46,7 +49,7 @@ namespace CRITR
         {
             foreach (String key in imageContainers.Keys)
             {
-                if(key == "")
+                if(key != "")
                 {
                     fileHandler.AddSimpleParagraph(outputPath, key);
                 }
@@ -60,5 +63,4 @@ namespace CRITR
             }
         }
     }
-
 }

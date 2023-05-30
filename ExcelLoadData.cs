@@ -1,3 +1,4 @@
+using Serilog;
 namespace CRITR
 {
     class ExcelLoadData
@@ -9,6 +10,7 @@ namespace CRITR
         //data value type substitute for excel config for now
         public ExcelLoadData(String fileName)
         {
+            Log.Logger.Information("Initializing excel Load Data Object for file {0}", fileName);
             fileHandler = new ExcelFileHandler();
             headers = new List<String>();
             types = new List<DataValueType>();
@@ -24,6 +26,9 @@ namespace CRITR
             List<String> rawTypes = fileHandler.GetFilledRow(1);
             types = new List<DataValueType>();
 
+            Log.Logger.Information("header Names: {0}", String.Join(", ", headers));
+            Log.Logger.Information("Data Types: {0}", String.Join(", ", rawTypes));
+
             foreach(String typeName in rawTypes)
             {
                 DataValueType newType;
@@ -35,6 +40,7 @@ namespace CRITR
                     throw new FileLoadException(String.Format("Error Parsing DataValueType {0}, setting to string",typeName));
                 }
             }
+
             if(headers.Count != types.Count){
                 throw new FileLoadException(String.Format("error Loading file: number of headers do not match number of dataTypes in file {0}",filePath));
             }
@@ -47,6 +53,8 @@ namespace CRITR
             {
                 List<String> rowData = fileHandler.GetDataRow(i,headers.Count);
                 ImageInfoContainer image = new ImageInfoContainer(headers, types, rowData);
+
+                Log.Logger.Information("New Entry: {0}", image.PrintRaw());
                 images.Add(image);
             }
 

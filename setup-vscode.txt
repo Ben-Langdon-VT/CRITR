@@ -1,0 +1,20 @@
+How I set up raw project in vscode:
+create empty folder
+
+install vscode
+install dotnet version 7
+
+dotnet new console --framework net7.0
+dotnet add package DocumentFormat.OpenXml
+dotnet add package Serilog
+dotnet add package Serilog.Sinks.Console
+
+reload vscode, maybe support for this in the window somewhere but i just close and reopen the application
+
+How you should setup this project in vscode:
+install vscode
+install dotnet version 7
+clone this repository to target folder
+reload vscode
+
+run by typing dotnet run into console while project folder is open (folder with .csproj)

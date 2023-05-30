@@ -41,6 +41,14 @@
             "DocumentFormat.OpenXml": {
               "target": "Package",
               "version": "[2.20.0, )"
+            },
+            "SeriLog": {
+              "target": "Package",
+              "version": "[2.12.0, )"
+            },
+            "SeriLog.Sinks.Console": {
+              "target": "Package",
+              "version": "[4.1.0, )"
             }
           },
           "imports": [

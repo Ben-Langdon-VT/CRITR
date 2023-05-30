@@ -1,10 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "IEisTnT5e+GdhKDSL97yXZ0QQoTKIQBNAi4vD4c3Z66nf93g9SCuOh+WLHNF2QiOqEpPDWCO+77pbDVNOdIc6w==",
+  "dgSpecHash": "G8hDJSLcjMJE9MrG0s0DYLkpV0IB3A+bbyBubw4dmy67/32ZsHF61HgxjIW1MYJ5I2q9niNPKDFZNP/8EaJXSg==",
   "success": true,
   "projectFilePath": "C:\\Users\\Ben\\Desktop\\CRITR\\CRITR.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Ben\\.nuget\\packages\\documentformat.openxml\\2.20.0\\documentformat.openxml.2.20.0.nupkg.sha512",
+    "C:\\Users\\Ben\\.nuget\\packages\\serilog\\2.12.0\\serilog.2.12.0.nupkg.sha512",
+    "C:\\Users\\Ben\\.nuget\\packages\\serilog.sinks.console\\4.1.0\\serilog.sinks.console.4.1.0.nupkg.sha512",
     "C:\\Users\\Ben\\.nuget\\packages\\system.io.packaging\\4.7.0\\system.io.packaging.4.7.0.nupkg.sha512"
   ],
   "logs": []

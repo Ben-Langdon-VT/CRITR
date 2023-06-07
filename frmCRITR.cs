@@ -1,7 +1,4 @@
-using System.Runtime.CompilerServices;
-using System.Windows.Forms;
-
-namespace WinFormsApp1
+namespace CRITR
 {
     public partial class frmCRITR : Form
     {

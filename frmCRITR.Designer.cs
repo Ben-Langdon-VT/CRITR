@@ -1,4 +1,4 @@
-﻿namespace WinFormsApp1
+﻿namespace CRITR
 {
     partial class frmCRITR
     {

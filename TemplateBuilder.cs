@@ -1,7 +1,7 @@
 using Serilog;
 namespace CRITR
 {
-    class Program
+    class TemplateBuilder
     {
         //internal variables
         String masterFolder;
@@ -23,7 +23,7 @@ namespace CRITR
             Console.WriteLine("--outputFile: set name of .docx file to save output");
         }
         //main processes args, calls mainloop
-        public Program(string[] args)
+        public TemplateBuilder(string[] args)
         {
             //Grouped all of this into main loop because static method wont run non static methods/variables of same class because its non deterministic (i think)
             masterFolder = @"C:\Users\Ben\Desktop\test";

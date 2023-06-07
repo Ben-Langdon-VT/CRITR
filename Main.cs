@@ -8,7 +8,7 @@ namespace CRITR
             var log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
             Log.Logger = log;
             
-            Program ExcelToDocx = new Program(args);
+            TemplateBuilder ExcelToDocx = new TemplateBuilder(args);
             bool worked = ExcelToDocx.LoadData();
             if (!worked)
             {
